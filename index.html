@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生预算规划助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .main-content {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }  
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .card h2 {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 3px solid #6e8efb;
+            padding-bottom: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #495057;
+            font-weight: 500;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #6e8efb;
+            box-shadow: 0 0 0 3px rgba(110, 142, 251, 0.2);
+        }
+                
+        .expense-categories {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .category-item {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .category-item label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #495057;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .category-item input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 0.95em;
+        }
+        
+        .category-item input:focus {
+            outline: none;
+            border-color: #6e8efb;
+        } 
+                
+        .progress-bar {
+            height: 100%;
+            background: white;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        
+        .goal-status {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+        
+        .button {
+            background: #6e8efb;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .button:hover {
+            background: #5a7be0;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .reset-button {
+            background: #dc3545;
+            margin-top: 10px;
+        }
+                
+        .reset-button:hover {
+            background: #c82333;
+        }
+        
+        .total-expenses {
+            font-size: 1.2em;
+            color: #dc3545;
+            font-weight: 700;
+            text-align: right;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px dashed #e0e0e0;
+        }
+        
+        .tips {
+            background: #e7f5ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            color: #0c5460;
+        }
+        
+        .category-icon {
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 学生预算规划助手</h1>
+            <p>轻松管理收支，实现储蓄目标</p >
+        </div>
+        
+        <div class="main-content">
+            <!-- 左侧：收入输入和支出类别 -->
+            <div class="card">
+                <h2>💰 收入与支出</h2>
+                
+                <div class="input-group">
+                    <label>📅 每月收入 (元)</label>
+                    <input type="number" id="monthlyIncome" placeholder="例如: 3000" min="0" step="100">
+                </div>
+                
+                <h3 style="margin: 20px 0 15px; color: #495057;">📊 支出类别</h3>
+                <div class="expense-categories">
+                    <div class="category-item">
+                        <label>
+                            <span class="color-dot" style="background: #ff6b6b;"></span>
+                            衣物 👕
+                        </label>
+                        <input type="number" id="clothing" class="expense-input" placeholder="0" min="0" step="10" value="0">
+                    </div>
+                    
+                    <div class="category-item">
+                        <label>
+                            <span class="color-dot" style="background: #4ecdc4;"></span>
+                            餐饮 🍜
+                        </label>
+                        <input type="number" id="food" class="expense-input" placeholder="0" min="0" step="10" value="0">
+                    </div>
+                    
+                    <div class="category-item">
+                        <label>
+                            <span class="color-dot" style="background: #ffe66d;"></span>
+                            娱乐 🎮
+                        </label>
+                        <input type="number" id="entertainment" class="expense-input" placeholder="0" min="0" step="10" value="0">
+                    </div>
+                    
+                    <div class="category-item">
+                        <label>
+                            <span class="color-dot" style="background: #c77dff;"></span>
+                            社交 🎉
+                        </label>
+                        <input type="number" id="social" class="expense-input" placeholder="0" min="0" step="10" value="0">
+                    </div>
+                    
+                    <div class="category-item">
+                        <label>
+                            <span class="color-dot" style="background: #95e1d3;"></span>
+                            交通 🚌
+                        </label>
+                        <input type="number" id="transport" class="expense-input" placeholder="0" min="0" step="10" value="0">
+                    </div>
+                    
+                    <div class="category-item">
+                        <label>
+                            <span class="color-dot" style="background: #f08a5d;"></span>
+                            医疗 🏥
+                        </label>
+                        <input type="number" id="medical" class="expense-input" placeholder="0" min="0" step="10" value="0">
+                    </div>
+                    
+                    <div class="category-item">
+                        <label>
+                            <span class="color-dot" style="background: #6c5ce7;"></span>
+                            其他 📝
+                        </label>
+                        <input type="number" id="other" class="expense-input" placeholder="0" min="0" step="10" value="0">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧：储蓄目标和摘要 -->
+            <div class="card">
+                <h2>🎯 储蓄目标</h2>
+                
+                <div class="input-group">
+                    <label>💎 每月储蓄目标 (元)</label>
+                    <input type="number" id="savingsGoal" placeholder="例如: 1000" min="0" step="100">
+                </div>
+                
+                <div class="summary-card">
+                    <h3 style="color: white; margin-bottom: 20px;">📋 预算摘要</h3>
+                    
+                    <div class="summary-item">
+                        <span class="label">总收入：</span>
+                        <span class="value" id="displayIncome">¥0</span>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <span class="label">总支出：</span>
+                        <span class="value" id="displayExpenses">¥0</span>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <span class="label">可储蓄金额：</span>
+                        <span class="value" id="displaySavings">¥0</span>
+                    </div>
+                    
+                    <div class="progress-container">
+                        <div class="progress-bar" id="savingsProgress" style="width: 0%"></div>
+                    </div>
+                    
+                    <div class="goal-status" id="goalStatus">
+                        储蓄目标完成 0%
+                    </div>
+                </div>
+                
+                <button class="button" onclick="calculateBudget()">📊 计算预算</button>
+                <button class="button reset-button" onclick="resetForm()">🔄 重置所有</button>
+                
+                <div class="tips" id="budgetTips">
+                    💡 输入收入和支出后点击"计算预算"查看分析
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateBudget() {
+            // 获取收入
+            const income = parseFloat(document.getElementById('monthlyIncome').value) || 0;
+            
+            // 获取所有支出
+            const categories = [
+                'clothing', 'food', 'entertainment', 'social', 
+                'transport', 'medical', 'other'
+            ];
+            
+            let totalExpenses = 0;
+            categories.forEach(cat => {
+                const value = parseFloat(document.getElementById(cat).value) || 0;
+                totalExpenses += value;
+            });
+            
+            // 计算可储蓄金额
+            const availableSavings = income - totalExpenses;
+            
+            // 获取储蓄目标
+            const savingsGoal = parseFloat(document.getElementById('savingsGoal').value) || 0;
+            
+            // 更新显示
+            document.getElementById('displayIncome').textContent = `¥${income.toFixed(2)}`;
+            document.getElementById('displayExpenses').textContent = `¥${totalExpenses.toFixed(2)}`;
+            document.getElementById('displaySavings').textContent = `¥${Math.max(0, availableSavings).toFixed(2)}`;
+            
+            // 计算储蓄进度
+            let progressPercentage = 0;
+            let goalStatus = '';
+            let tips = '';
+            
+            if (savingsGoal > 0) {
+                if (availableSavings >= savingsGoal) {
+                    progressPercentage = 100;
+                    const extra = availableSavings - savingsGoal;
+                    goalStatus = `🎉 太棒了！超出目标 ¥${extra.toFixed(2)}`;
+                    tips = '你做得很好！考虑将多余的钱用于投资或应急基金。';
+                } else if (availableSavings > 0) {
+                    progressPercentage = (availableSavings / savingsGoal) * 100;
+                    const need = savingsGoal - availableSavings;
+                    goalStatus = `💪 还差 ¥${need.toFixed(2)} 达成目标`;
+                    tips = '可以尝试减少一些非必要支出，如娱乐或社交开销。';
+                } else {
+                    progressPercentage = 0;
+                    const overspend = Math.abs(availableSavings);
+                    goalStatus = `⚠️ 支出超出收入 ¥${overspend.toFixed(2)}`;
+                    tips = '需要立即调整支出！优先削减娱乐、衣物等可变开销。';
+                }
+            } else {
+                if (availableSavings > 0) {
+                    goalStatus = `💰 本月可储蓄 ¥${availableSavings.toFixed(2)}`;
+                    tips = '设置一个储蓄目标可以帮助你更好地规划财务。';
+                } else if (availableSavings < 0) {
+                    goalStatus = `⚠️ 支出超出收入 ¥${Math.abs(availableSavings).toFixed(2)}`;
+                    tips = '建议记录每笔支出，找出可以削减的项目。';
+                                    } else {
+                    goalStatus = '收支平衡';
+                    tips = '尝试增加收入或减少支出来开始储蓄。';
+                }
+            }
+            
+            // 更新进度条
+            document.getElementById('savingsProgress').style.width = `${Math.min(100, progressPercentage)}%`;
+            document.getElementById('goalStatus').textContent = goalStatus;
+            
+            // 更新建议
+            let tipsHTML = '💡 ' + tips;
+            
+            // 添加支出分析
+            if (totalExpenses > 0) {
+                tipsHTML += '<br><br>📊 支出分析：';
+                const categories = [
+                    { id: 'clothing', name: '衣物', color: '#ff6b6b' },
+                    { id: 'food', name: '餐饮', color: '#4ecdc4' },
+                    { id: 'entertainment', name: '娱乐', color: '#ffe66d' },
+                    { id: 'social', name: '社交', color: '#c77dff' },
+                    { id: 'transport', name: '交通', color: '#95e1d3' },
+                    { id: 'medical', name: '医疗', color: '#f08a5d' },
+                    { id: 'other', name: '其他', color: '#6c5ce7' }
+                ];
+                
+                categories.forEach(cat => {
+                    const value = parseFloat(document.getElementById(cat.id).value) || 0;
+                    if (value > 0) {
+                        const percentage = ((value / totalExpenses) * 100).toFixed(1);
+                        tipsHTML += `<br> <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:${cat.color};"></span> ${cat.name}: ¥${value.toFixed(2)} (${percentage}%)`;
+                    }
+                });
+            }
+            
+            document.getElementById('budgetTips').innerHTML = tipsHTML;
+        }
+        
+        function resetForm() {
+            // 重置所有输入框
+            document.getElementById('monthlyIncome').value = '';
+            document.getElementById('savingsGoal').value = '';
+            
+            const expenseInputs = document.querySelectorAll('.expense-input');
+            expenseInputs.forEach(input => {
+                input.value = '0';
+            });
+            
+            // 重置显示
+            document.getElementById('displayIncome').textContent = '¥0';
+            document.getElementById('displayExpenses').textContent = '¥0';
+            document.getElementById('displaySavings').textContent = '¥0';
+            document.getElementById('savingsProgress').style.width = '0%';
+            document.getElementById('goalStatus').textContent = '储蓄目标完成 0%';
+            document.getElementById('budgetTips').innerHTML = '💡 输入收入和支出后点击"计算预算"查看分析';
+        }
+        
+        // 添加输入事件监听，实时计算（可选）
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', function() {
+                // 如果不想实时计算，可以注释掉下一行
+                // calculateBudget();
+            });
+        });
+    </script>
+</body>
+</html>
